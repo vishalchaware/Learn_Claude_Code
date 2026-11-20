@@ -141,9 +141,27 @@ for block in tool_calls:
 
 ## Try It
 
+### Python
+
 ```sh
 cd learn-claude-code
 python s03_permission/code.py
+```
+
+### Node.js
+
+The equivalent Node.js CLI uses Node.js 22 or newer and the same `.env` settings
+as the Python version (`ANTHROPIC_API_KEY` and `MODEL_ID`).
+
+```sh
+cd learn-claude-code
+node s03_permission/code.mjs
+```
+
+To run the Node.js permission checks without calling the model:
+
+```sh
+node --test s03_permission/code.test.mjs
 ```
 
 Try these prompts:

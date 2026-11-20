@@ -28,6 +28,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Optional, Union
 
 try:
     import readline
@@ -71,7 +72,7 @@ def run_bash(command: str) -> str:
     except subprocess.TimeoutExpired:
         return "Error: Timeout (120s)"
 
-def run_read(path: str, limit: int | None = None) -> str:
+def run_read(path: str, limit: Optional[int] = None) -> str:
     try:
         lines = (WORKDIR / path).resolve().read_text(encoding="utf-8").splitlines()
         if limit and limit < len(lines):
@@ -122,7 +123,7 @@ class TodoManager:
     def __init__(self):
         self.items: list[dict] = []
 
-    def update(self, todos: list | str) -> str:
+    def update(self, todos: Union[list, str]) -> str:
         if isinstance(todos, str):
             try:
                 todos = json.loads(todos)
@@ -180,7 +181,7 @@ class TodoManager:
 TODO = TodoManager()
 
 
-def run_todo_write(todos: list | str) -> str:
+def run_todo_write(todos: Union[list, str]) -> str:
     try:
         output = TODO.update(todos)
     except ValueError as e:
@@ -344,6 +345,7 @@ def agent_loop(messages: list):
             rounds_since_todo = 0
 
         messages.append({"role": "user", "content": results})
+        print('Last message:', messages[-1])
 
 
 if __name__ == "__main__":

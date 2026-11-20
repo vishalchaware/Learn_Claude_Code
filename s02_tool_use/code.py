@@ -24,6 +24,7 @@ Key insight: the loop stays the same; only tool registration and dispatch grow.
 import os
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 try:
     import readline
@@ -85,7 +86,7 @@ def safe_path(p: str) -> Path:
     return path
 
 
-def run_read(path: str, limit: int | None = None) -> str:
+def run_read(path: str, limit: Optional[int] = None) -> str:
     try:
         lines = safe_path(path).read_text(encoding="utf-8").splitlines()
         if limit and limit < len(lines):

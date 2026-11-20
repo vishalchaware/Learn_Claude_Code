@@ -35,6 +35,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 try:
     import readline
@@ -83,7 +84,7 @@ def run_bash(command: str) -> str:
         return "Error: Timeout (120s)"
 
 
-def run_read(path: str, limit: int | None = None) -> str:
+def run_read(path: str, limit: Optional[int] = None) -> str:
     try:
         lines = (WORKDIR / path).resolve().read_text(encoding="utf-8").splitlines()
         if limit and limit < len(lines):
@@ -157,7 +158,7 @@ TOOL_HANDLERS = {
 # Gate 1: Hard deny list - always forbidden
 DENY_LIST = ["rm -rf /", "sudo", "shutdown", "reboot", "mkfs", "dd if=", "> /dev/sda"]
 
-def check_deny_list(command: str) -> str | None:
+def check_deny_list(command: str) -> Optional[str]:
     for pattern in DENY_LIST:
         if pattern in command:
             return f"Blocked: '{pattern}' is on the deny list"
@@ -184,7 +185,7 @@ PERMISSION_RULES = [
      "message": "Potentially destructive command"},
 ]
 
-def check_rules(tool_name: str, args: dict) -> str | None:
+def check_rules(tool_name: str, args: dict) -> Optional[str]:
     for rule in PERMISSION_RULES:
         if tool_name in rule["tools"] and rule["check"](args):
             return rule["message"]
@@ -203,12 +204,15 @@ def ask_user(tool_name: str, args: dict, reason: str) -> str:
 def check_permission(block) -> bool:
     if block.name == "bash":
         reason = check_deny_list(block.input.get("command", ""))
+        print("check permission - reason", reason);
         if reason:
             print(f"\n\033[31m[blocked] {reason}\033[0m")
             return False
     reason = check_rules(block.name, block.input)
+    print("check rules - reason", reason);
     if reason:
         decision = ask_user(block.name, block.input, reason)
+        print("ask user - decision", decision);
         if decision == "deny":
             return False
     return True
@@ -235,6 +239,8 @@ def agent_loop(messages: list):
             print(f"\033[36m> {block.name}\033[0m")
 
             # s03 change: run through permission pipeline before executing
+            print("check permission - block", block.name, block.input);
+            print("check_permission(block)", check_permission(block));
             if not check_permission(block):
                 results.append({"type": "tool_result", "tool_use_id": block.id,
                                 "content": "Permission denied."})

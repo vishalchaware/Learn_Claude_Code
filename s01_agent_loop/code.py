@@ -44,6 +44,7 @@ except ImportError:
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
+from pprint import pprint
 
 load_dotenv(override=True)
 
@@ -102,6 +103,7 @@ def agent_loop(messages: list):
 
         # Append assistant turn
         messages.append({"role": "assistant", "content": response.content})
+        pprint(messages)
 
         # If the model didn't call a tool, we're done
         tool_calls = [
@@ -124,6 +126,18 @@ def agent_loop(messages: list):
 
         # Feed tool results back, loop continues
         messages.append({"role": "user", "content": results})
+
+# -- Show --
+
+def show(messages):
+    print("\n--- messages ---")
+    for i, m in enumerate(messages):
+        content = m["content"]
+        if isinstance(content, str):
+            print(f"[{i}] {m['role']}: {content}")
+        else:
+            for block in content:
+                print(f"[{i}] {m['role']}: {block}")
 
 
 # -- Entry point --
